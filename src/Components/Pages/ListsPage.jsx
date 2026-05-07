@@ -34,8 +34,7 @@ const ListsPage = ({
                     <thead>
                         <tr>
                             <th>Question</th>
-                            <th>Category</th>
-                            <th>Sub Category</th>
+                            <th>Tags</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -57,10 +56,21 @@ const ListsPage = ({
                                         {stripHtml(task.title)}
                                     </td>
 
-                                    <td>{task.category}</td>
-
                                     <td>
-                                        {task.subCategory}
+                                        <div className="chip-row">
+                                            {task.categoryMappings?.map(
+                                                (item, index) => (
+                                                    <span
+                                                        className="chip"
+                                                        key={index}
+                                                    >
+                                                        {item.category}
+                                                        {" > "}
+                                                        {item.subCategory}
+                                                    </span>
+                                                )
+                                            )}
+                                        </div>
                                     </td>
 
                                     <td>{task.status}</td>

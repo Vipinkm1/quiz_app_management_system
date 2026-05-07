@@ -66,16 +66,20 @@ const ReportsPage = ({
 
   const completionRate = totalQuestions
     ? Math.round(
-        (completed / totalQuestions) *
-          100
-      )
+      (completed / totalQuestions) *
+      100
+    )
     : 0;
 
   const categoryAnalytics = categories.map(
     (category) => {
       const count = tasks.filter(
         (task) =>
-          task.category === category.name
+          task.categoryMappings?.some(
+            (item) =>
+              item.category ===
+              category.name
+          )
       ).length;
 
       return {
@@ -323,7 +327,7 @@ const ReportsPage = ({
 
             <tbody>
               {categoryAnalytics.length ===
-              0 ? (
+                0 ? (
                 <tr>
                   <td colSpan={2}>
                     No category data
@@ -356,7 +360,7 @@ const ReportsPage = ({
             <thead>
               <tr>
                 <th>Question</th>
-                <th>Category</th>
+                <th>Tags</th>
                 <th>Status</th>
                 <th>Difficulty</th>
               </tr>
@@ -385,7 +389,20 @@ const ReportsPage = ({
                       </td>
 
                       <td>
-                        {task.category}
+                        <div className="chip-row">
+                          {task.categoryMappings?.map(
+                            (item, index) => (
+                              <span
+                                className="chip"
+                                key={index}
+                              >
+                                {item.category}
+                                {" > "}
+                                {item.subCategory}
+                              </span>
+                            )
+                          )}
+                        </div>
                       </td>
 
                       <td>

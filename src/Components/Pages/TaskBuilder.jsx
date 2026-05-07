@@ -12,8 +12,7 @@ const getEmptyForm = (categories, subcategories = []) => {
     description: "",
     hint: "",
     explanation: "",
-    category: defaultCategory,
-    subCategory: defaultSubCategory,
+    categoryMappings: [],
     priority: "Medium",
     due: "Today",
     status: "pending",
@@ -52,6 +51,16 @@ const TaskBuilder = ({ tasks, categories, subcategories, taskToEdit, onAddTask, 
     useState(false);
   const [editId, setEditId] = useState(null);
   const [options, setOptions] = useState(seedOptions);
+  // MULTI CATEGORY TAGGING
+  const [
+    selectedCategory,
+    setSelectedCategory,
+  ] = useState("");
+
+  const [
+    selectedSubCategory,
+    setSelectedSubCategory,
+  ] = useState("");
   const [
     correctAnswers,
     setCorrectAnswers,
@@ -94,10 +103,17 @@ const TaskBuilder = ({ tasks, categories, subcategories, taskToEdit, onAddTask, 
     return tasks.filter((task) => task.status === filter);
   }, [tasks, filter]);
 
-  const filteredSubCategories = useMemo(
-    () => subcategories.filter((subCategory) => subCategory.parent === form.category),
-    [subcategories, form.category]
-  );
+  const filteredSubCategories =
+    useMemo(() => {
+      return subcategories.filter(
+        (subCategory) =>
+          subCategory.parent ===
+          selectedCategory
+      );
+    }, [
+      subcategories,
+      selectedCategory,
+    ]);
 
   useEffect(() => {
     if (!form.category) {
@@ -134,7 +150,58 @@ const TaskBuilder = ({ tasks, categories, subcategories, taskToEdit, onAddTask, 
     });
     setSubCategoryDraft("");
   };
+  // ADD CATEGORY TAG
+  const addCategoryMapping =
+    () => {
+      if (
+        !selectedCategory ||
+        !selectedSubCategory
+      )
+        return;
 
+      const exists =
+        form.categoryMappings?.some(
+          (item) =>
+            item.category ===
+            selectedCategory &&
+            item.subCategory ===
+            selectedSubCategory
+        );
+
+      if (exists) return;
+
+      setForm((prev) => ({
+        ...prev,
+
+        categoryMappings: [
+          ...(prev.categoryMappings ||
+            []),
+
+          {
+            category:
+              selectedCategory,
+
+            subCategory:
+              selectedSubCategory,
+          },
+        ],
+      }));
+
+      setSelectedSubCategory("");
+    };
+
+  // REMOVE CATEGORY TAG
+  const removeCategoryMapping =
+    (index) => {
+      setForm((prev) => ({
+        ...prev,
+
+        categoryMappings:
+          prev.categoryMappings.filter(
+            (_, i) => i !== index
+          ),
+      }));
+    };
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -725,54 +792,105 @@ const TaskBuilder = ({ tasks, categories, subcategories, taskToEdit, onAddTask, 
           <article className="card-panel">
             <h3>Question Settings</h3>
             <div className="settings-grid">
-              <label>
-                Category
-                <select
-                  value={form.category}
-                  onChange={(e) => {
-                    const nextCategory =
-                      e.target.value;
+              <div className="settings-grid">
+                <label>
+                  Category
 
-                    setForm((prev) => ({
-                      ...prev,
-                      category: nextCategory,
-                      subCategory: "",
-                    }));
-                  }}
-                >
-                  <option value="">
-                    Select Category
-                  </option>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => {
+                      setSelectedCategory(
+                        e.target.value
+                      );
 
-                  {categories.map((category) => (
-                    <option
-                      key={category.id}
-                      value={category.name}
-                    >
-                      {category.name}
+                      setSelectedSubCategory(
+                        ""
+                      );
+                    }}
+                  >
+                    <option value="">
+                      Select Category
                     </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Sub Category
-                <select
-                  value={form.subCategory}
-                  onChange={(e) => handleChange("subCategory", e.target.value)}
-                  disabled={!filteredSubCategories.length}
-                >
-                  <option value="">
-                    Select Sub Category
-                  </option>
-                  {filteredSubCategories.length ? (
-                    filteredSubCategories.map((subCategory) => (
-                      <option key={subCategory.id} value={subCategory.name}>{subCategory.name}</option>
-                    ))
-                  ) : (
-                    <option value="">No sub category available</option>
-                  )}
-                </select>
-              </label>
+
+                    {categories.map(
+                      (category) => (
+                        <option
+                          key={category.id}
+                          value={category.name}
+                        >
+                          {category.name}
+                        </option>
+                      )
+                    )}
+                  </select>
+                </label>
+
+                <label>
+                  Sub Category
+
+                  <select
+                    value={selectedSubCategory}
+                    onChange={(e) =>
+                      setSelectedSubCategory(
+                        e.target.value
+                      )
+                    }
+                  >
+                    <option value="">
+                      Select Sub Category
+                    </option>
+
+                    {filteredSubCategories.map(
+                      (subCategory) => (
+                        <option
+                          key={subCategory.id}
+                          value={
+                            subCategory.name
+                          }
+                        >
+                          {subCategory.name}
+                        </option>
+                      )
+                    )}
+                  </select>
+                </label>
+              </div>
+
+              <button
+                className="file-btn"
+                type="button"
+                onClick={
+                  addCategoryMapping
+                }
+              >
+                + Add Tag
+              </button>
+
+              <div className="chip-row">
+                {form.categoryMappings?.map(
+                  (item, index) => (
+                    <div
+                      className="chip"
+                      key={index}
+                    >
+                      {item.category} &gt;{" "}
+                      {item.subCategory}
+
+                      <button
+                        type="button"
+                        className="cross"
+                        onClick={() =>
+                          removeCategoryMapping(
+                            index
+                          )
+                        }
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )
+                )}
+              </div>
               <label>
                 Difficulty
                 <select value={form.priority} onChange={(e) => handleChange("priority", e.target.value)}>

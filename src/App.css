@@ -856,6 +856,7 @@ select:focus {
   margin-bottom: 4px;
 }
 
+
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -879,6 +880,12 @@ select:focus {
   .placeholder-grid {
     grid-template-columns: 1fr 1fr;
   }
+}
+
+.cross{
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
 }
 
 @media (max-width: 768px) {

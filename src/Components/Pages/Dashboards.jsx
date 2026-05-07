@@ -81,7 +81,7 @@ const Dashboards = ({ tasks, onOpenTasks }) => {
           <thead>
             <tr>
               <th>Task</th>
-              <th>Category</th>
+              <th>Tags</th>
               <th>Status</th>
               <th>Due</th>
             </tr>
@@ -90,7 +90,22 @@ const Dashboards = ({ tasks, onOpenTasks }) => {
             {recentTasks.map((task) => (
               <tr key={task.id}>
                 <td dangerouslySetInnerHTML={{ __html: task.title }} />
-                <td>{task.category}</td>
+                <td>
+                  <div className="chip-row">
+                    {task.categoryMappings?.map(
+                      (item, index) => (
+                        <span
+                          className="chip"
+                          key={index}
+                        >
+                          {item.category}
+                          {" > "}
+                          {item.subCategory}
+                        </span>
+                      )
+                    )}
+                  </div>
+                </td>
                 <td><span className={statusClass(task.status)}>{task.status}</span></td>
                 <td>{task.due}</td>
               </tr>
